@@ -23,7 +23,7 @@ sudo mv gitprofile /usr/local/bin/
 
 ### From Source
 ```bash
-go install github.com/yourusername/gitprofile@latest
+go install github.com/Scharxi/gitprofile@latest
 ```
 
 ## Usage
