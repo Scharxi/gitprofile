@@ -8,11 +8,6 @@ A CLI tool to manage git profiles (name, email, GPG key, commit signing) and act
 1. Download the latest release from the releases page
 2. Add the binary to your PATH
 
-### macOS
-```bash
-brew install gitprofile
-```
-
 ### Linux
 ```bash
 # Download the binary
