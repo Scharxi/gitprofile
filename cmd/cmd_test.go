@@ -11,19 +11,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var testConfigFileName string
-
-func setupTestProfiles(t *testing.T) (string, func()) {
+func setupTestEnv(t *testing.T) (string, func()) {
 	// Create a temporary directory for test config
-	tmpDir, err := os.MkdirTemp("", "gitprofile-test")
+	tmpDir, err := os.MkdirTemp("", "gitprofile-test-*")
 	require.NoError(t, err)
 
-	// Save original config path and set test config
-	testConfigFileName = filepath.Join(tmpDir, ".gitprofiles.json")
+	// Set the test config path
+	testConfigPath := filepath.Join(tmpDir, ".gitprofiles.json")
+	SetTestConfigPath(testConfigPath)
 
 	// Return cleanup function
 	cleanup := func() {
 		os.RemoveAll(tmpDir)
+		SetTestConfigPath("") // Reset test config path
 	}
 
 	return tmpDir, cleanup
@@ -38,7 +38,7 @@ func getGitConfig(args ...string) (string, error) {
 }
 
 func TestAddCommand(t *testing.T) {
-	_, cleanup := setupTestProfiles(t)
+	_, cleanup := setupTestEnv(t)
 	defer cleanup()
 
 	tests := []struct {
@@ -129,7 +129,7 @@ func TestAddCommand(t *testing.T) {
 }
 
 func TestListCommand(t *testing.T) {
-	_, cleanup := setupTestProfiles(t)
+	_, cleanup := setupTestEnv(t)
 	defer cleanup()
 
 	// Add some test profiles
@@ -165,7 +165,7 @@ func TestListCommand(t *testing.T) {
 }
 
 func TestUseCommand(t *testing.T) {
-	tmpDir, cleanup := setupTestProfiles(t)
+	tmpDir, cleanup := setupTestEnv(t)
 	defer cleanup()
 
 	// Create a test git repository
@@ -221,7 +221,7 @@ func TestUseCommand(t *testing.T) {
 }
 
 func TestStatusCommand(t *testing.T) {
-	tmpDir, cleanup := setupTestProfiles(t)
+	tmpDir, cleanup := setupTestEnv(t)
 	defer cleanup()
 
 	// Create a test git repository

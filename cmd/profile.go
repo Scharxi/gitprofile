@@ -17,9 +17,21 @@ type Profile struct {
 
 type ProfileMap map[string]Profile
 
-const configFileName = ".gitprofiles.json"
+var (
+	configFileName = ".gitprofiles.json"
+	testConfigPath string // Used for testing
+)
+
+// SetTestConfigPath sets a temporary config path for testing
+func SetTestConfigPath(path string) {
+	testConfigPath = path
+}
 
 func GetConfigPath() (string, error) {
+	if testConfigPath != "" {
+		return testConfigPath, nil
+	}
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
