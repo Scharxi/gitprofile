@@ -264,3 +264,61 @@ func TestStatusCommand(t *testing.T) {
 	assert.Contains(t, output, "test@example.com")
 	assert.Contains(t, output, "testprofile")
 }
+
+func TestDeleteCommand(t *testing.T) {
+	_, cleanup := setupTestEnv(t)
+	defer cleanup()
+
+	// Add test profiles
+	profiles := ProfileMap{
+		"profile1": {
+			Name:  "User 1",
+			Email: "user1@example.com",
+		},
+		"profile2": {
+			Name:  "User 2",
+			Email: "user2@example.com",
+		},
+	}
+
+	err := SaveProfiles(profiles)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name        string
+		profileName string
+		expectError bool
+	}{
+		{
+			name:        "delete existing profile",
+			profileName: "profile1",
+			expectError: false,
+		},
+		{
+			name:        "delete non-existent profile",
+			profileName: "nonexistent",
+			expectError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cmd := NewDeleteCmd()
+			err := cmd.RunE(cmd, []string{tt.profileName})
+
+			if tt.expectError {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+
+			// Verify profile was deleted
+			profiles, err := LoadProfiles()
+			require.NoError(t, err)
+
+			_, exists := profiles[tt.profileName]
+			assert.False(t, exists)
+		})
+	}
+}

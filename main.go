@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/Scharxi/gitprofile/cmd"
@@ -10,19 +11,21 @@ import (
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "gitprofile",
-		Short: "Manage your git profiles",
-		Long: `A CLI tool to manage different git profiles (name, email, GPG key, commit signing)
-and activate them per project.`,
+		Short: "A tool for managing multiple git profiles",
+		Long: `gitprofile helps you manage multiple git configurations for different projects.
+It allows you to save and switch between different git profiles with different names, emails, and GPG keys.`,
 	}
 
-	rootCmd.AddCommand(cmd.NewAddCmd())
-	rootCmd.AddCommand(cmd.NewListCmd())
-	rootCmd.AddCommand(cmd.NewUseCmd())
-	rootCmd.AddCommand(cmd.NewStatusCmd())
-	rootCmd.AddCommand(cmd.NewCompletionCmd())
-	rootCmd.AddCommand(cmd.NewTUICmd())
+	rootCmd.AddCommand(
+		cmd.NewAddCmd(),
+		cmd.NewListCmd(),
+		cmd.NewUseCmd(),
+		cmd.NewStatusCmd(),
+		cmd.NewDeleteCmd(),
+	)
 
 	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
