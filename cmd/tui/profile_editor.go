@@ -12,6 +12,7 @@ type Field struct {
 	name     string
 	value    string
 	editable bool
+	cursor   int
 }
 
 type ProfileEditor struct {
@@ -65,13 +66,33 @@ func (m *ProfileEditor) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.editing {
 				if m.fields[m.cursor].editable {
 					m.editing = true
+					m.fields[m.cursor].value = ""
+					m.fields[m.cursor].cursor = 0
 				}
 				return m, nil
 			}
 			m.editing = false
 		case "backspace":
-			if m.editing && len(m.fields[m.cursor].value) > 0 {
-				m.fields[m.cursor].value = m.fields[m.cursor].value[:len(m.fields[m.cursor].value)-1]
+			if m.editing {
+				field := &m.fields[m.cursor]
+				if field.cursor > 0 {
+					field.value = field.value[:field.cursor-1] + field.value[field.cursor:]
+					field.cursor--
+				}
+			}
+		case "left":
+			if m.editing {
+				field := &m.fields[m.cursor]
+				if field.cursor > 0 {
+					field.cursor--
+				}
+			}
+		case "right":
+			if m.editing {
+				field := &m.fields[m.cursor]
+				if field.cursor < len(field.value) {
+					field.cursor++
+				}
 			}
 		case "s":
 			if !m.editing && msg.Alt {
@@ -80,7 +101,14 @@ func (m *ProfileEditor) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		default:
 			if m.editing && msg.Type == tea.KeyRunes {
-				m.fields[m.cursor].value += string(msg.Runes)
+				field := &m.fields[m.cursor]
+				text := string(msg.Runes)
+				if field.cursor == len(field.value) {
+					field.value += text
+				} else {
+					field.value = field.value[:field.cursor] + text + field.value[field.cursor:]
+				}
+				field.cursor += len(text)
 			}
 		}
 	}
@@ -112,13 +140,18 @@ func (m *ProfileEditor) View() string {
 			fieldStyle = itemStyle
 		}
 
-		s.WriteString(fieldStyle.Render(fmt.Sprintf("%s: %s", field.name, field.value)))
+		value := field.value
+		if m.editing && i == m.cursor {
+			value = value[:field.cursor] + "|" + value[field.cursor:]
+		}
+
+		s.WriteString(fieldStyle.Render(fmt.Sprintf("%s: %s", field.name, value)))
 		s.WriteString("\n")
 	}
 
 	s.WriteString("\n")
 	if m.editing {
-		s.WriteString(lipgloss.NewStyle().Foreground(subtle).Render("enter: Save field • esc: Cancel editing"))
+		s.WriteString(lipgloss.NewStyle().Foreground(subtle).Render("enter: Save field • esc: Cancel editing • ←/→: Move cursor"))
 	} else {
 		s.WriteString(lipgloss.NewStyle().Foreground(subtle).Render("↑/↓: Navigate • enter: Edit field • alt+s: Save profile • esc: Cancel"))
 	}

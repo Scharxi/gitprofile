@@ -7,32 +7,35 @@ import (
 )
 
 func NewListCmd() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List all saved git profiles",
-		Long:  `List all git profiles stored in ~/.gitprofiles.json`,
+		Short: "List all git profiles",
+		Long:  `Display all saved git profiles with their settings`,
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profiles, err := LoadProfiles()
 			if err != nil {
 				return fmt.Errorf("failed to load profiles: %w", err)
 			}
 
-			if len(profiles) == 0 {
-				fmt.Println("No profiles found")
-				return nil
-			}
+			w := cmd.OutOrStdout()
 
 			for name, profile := range profiles {
-				fmt.Printf("\nProfile: %s\n", name)
-				fmt.Printf("  Name: %s\n", profile.Name)
-				fmt.Printf("  Email: %s\n", profile.Email)
+				fmt.Fprintf(w, "\nProfile: %s\n", name)
+				fmt.Fprintf(w, "  Name: %s\n", profile.Name)
+				fmt.Fprintf(w, "  Email: %s\n", profile.Email)
 				if profile.GPGKey != "" {
-					fmt.Printf("  GPG Key: %s\n", profile.GPGKey)
+					fmt.Fprintf(w, "  GPG Key: %s\n", profile.GPGKey)
 				}
-				fmt.Printf("  Sign Commits: %v\n", profile.SignCommits)
+				if profile.SSHKey != "" {
+					fmt.Fprintf(w, "  SSH Key: %s\n", profile.SSHKey)
+				}
+				fmt.Fprintf(w, "  Sign Commits: %v\n", profile.SignCommits)
 			}
 
 			return nil
 		},
 	}
-} 
+
+	return cmd
+}

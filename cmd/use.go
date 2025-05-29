@@ -2,9 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os/exec"
-	"runtime"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -18,7 +15,8 @@ This will set user.name, user.email, GPG signing, and SSH key configuration.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Check if we're in a git repository
-			if err := runGitCommand("rev-parse", "--git-dir"); err != nil {
+			_, err := runGitCommand("rev-parse", "--git-dir")
+			if err != nil {
 				return fmt.Errorf("not a git repository (or any of the parent directories)")
 			}
 
@@ -34,18 +32,21 @@ This will set user.name, user.email, GPG signing, and SSH key configuration.`,
 			}
 
 			// Set user.name
-			if err := runGitCommand("config", "--local", "user.name", profile.Name); err != nil {
+			_, err = runGitCommand("config", "--local", "user.name", profile.Name)
+			if err != nil {
 				return fmt.Errorf("failed to set user.name: %w", err)
 			}
 
 			// Set user.email
-			if err := runGitCommand("config", "--local", "user.email", profile.Email); err != nil {
+			_, err = runGitCommand("config", "--local", "user.email", profile.Email)
+			if err != nil {
 				return fmt.Errorf("failed to set user.email: %w", err)
 			}
 
 			// Handle GPG settings if configured
 			if profile.GPGKey != "" {
-				if err := runGitCommand("config", "--local", "user.signingkey", profile.GPGKey); err != nil {
+				_, err = runGitCommand("config", "--local", "user.signingkey", profile.GPGKey)
+				if err != nil {
 					return fmt.Errorf("failed to set signing key: %w", err)
 				}
 			}
@@ -55,13 +56,15 @@ This will set user.name, user.email, GPG signing, and SSH key configuration.`,
 			if profile.SignCommits {
 				signValue = "true"
 			}
-			if err := runGitCommand("config", "--local", "commit.gpgsign", signValue); err != nil {
+			_, err = runGitCommand("config", "--local", "commit.gpgsign", signValue)
+			if err != nil {
 				return fmt.Errorf("failed to set commit signing: %w", err)
 			}
 
 			// Configure SSH key if specified
 			if profile.SSHKey != "" {
-				if err := runGitCommand("config", "--local", "core.sshCommand", fmt.Sprintf("ssh -i %s", profile.SSHKey)); err != nil {
+				_, err = runGitCommand("config", "--local", "core.sshCommand", fmt.Sprintf("ssh -i %s", profile.SSHKey))
+				if err != nil {
 					return fmt.Errorf("failed to set SSH key: %w", err)
 				}
 			}
@@ -73,19 +76,4 @@ This will set user.name, user.email, GPG signing, and SSH key configuration.`,
 	}
 
 	return cmd
-}
-
-func runGitCommand(args ...string) error {
-	var cmd *exec.Cmd
-	if runtime.GOOS == "windows" {
-		cmd = exec.Command("git.exe", args...)
-	} else {
-		cmd = exec.Command("git", args...)
-	}
-
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("%s: %s", err.Error(), strings.TrimSpace(string(output)))
-	}
-	return nil
 }

@@ -7,30 +7,38 @@ import (
 )
 
 func NewStatusCmd() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "status",
 		Short: "Show current git profile",
-		Long:  `Show the active git profile in the current repository`,
+		Long:  `Display the active git profile in the current repository`,
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			profile, name, err := GetCurrentProfile()
+			profile, profileName, err := GetCurrentProfile()
 			if err != nil {
 				return fmt.Errorf("failed to get current profile: %w", err)
 			}
-			
+
+			w := cmd.OutOrStdout()
+
 			if profile == nil {
-				fmt.Println("No profile active in current repository")
+				fmt.Fprintln(w, "No active profile found")
 				return nil
 			}
-			
-			fmt.Printf("Active profile: %s\n", name)
-			fmt.Printf("  Name: %s\n", profile.Name)
-			fmt.Printf("  Email: %s\n", profile.Email)
+
+			fmt.Fprintf(w, "Active profile: %s\n", profileName)
+			fmt.Fprintf(w, "  Name: %s\n", profile.Name)
+			fmt.Fprintf(w, "  Email: %s\n", profile.Email)
 			if profile.GPGKey != "" {
-				fmt.Printf("  GPG Key: %s\n", profile.GPGKey)
+				fmt.Fprintf(w, "  GPG Key: %s\n", profile.GPGKey)
 			}
-			fmt.Printf("  Sign Commits: %v\n", profile.SignCommits)
-			
+			if profile.SSHKey != "" {
+				fmt.Fprintf(w, "  SSH Key: %s\n", profile.SSHKey)
+			}
+			fmt.Fprintf(w, "  Sign Commits: %v\n", profile.SignCommits)
+
 			return nil
 		},
 	}
-} 
+
+	return cmd
+}

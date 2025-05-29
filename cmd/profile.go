@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -67,15 +66,12 @@ func SaveProfiles(profiles ProfileMap) error {
 // GetCurrentProfile returns the currently active profile in the current repository
 func GetCurrentProfile() (*Profile, string, error) {
 	// Get current git user name and email
-	nameCmd := exec.Command("git", "config", "--local", "user.name")
-	emailCmd := exec.Command("git", "config", "--local", "user.email")
-
-	name, err := nameCmd.Output()
+	name, err := runGitCommand("config", "--local", "user.name")
 	if err != nil {
 		return nil, "", nil // No local git config found
 	}
 
-	email, err := emailCmd.Output()
+	email, err := runGitCommand("config", "--local", "user.email")
 	if err != nil {
 		return nil, "", nil
 	}

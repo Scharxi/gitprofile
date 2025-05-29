@@ -17,6 +17,14 @@ func NewAddCmd() *cobra.Command {
 The profile will be saved in ~/.gitprofiles.json`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// Validate required fields
+			if name == "" {
+				return fmt.Errorf("name is required")
+			}
+			if email == "" {
+				return fmt.Errorf("email is required")
+			}
+
 			profileName := args[0]
 			profiles, err := LoadProfiles()
 			if err != nil {
@@ -51,9 +59,6 @@ The profile will be saved in ~/.gitprofiles.json`,
 	cmd.Flags().StringVar(&gpgKey, "gpg-key", "", "GPG key ID")
 	cmd.Flags().StringVar(&sshKey, "ssh-key", "", "SSH key file path (e.g., ~/.ssh/id_rsa)")
 	cmd.Flags().BoolVar(&signCommits, "sign", false, "Enable commit signing")
-
-	cmd.MarkFlagRequired("name")
-	cmd.MarkFlagRequired("email")
 
 	return cmd
 }
