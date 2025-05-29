@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/spf13/cobra"
 	"github.com/Scharxi/gitprofile/cmd"
+	"github.com/spf13/cobra"
 )
 
 func main() {
@@ -20,6 +20,7 @@ and activate them per project.`,
 	rootCmd.AddCommand(cmd.NewUseCmd())
 	rootCmd.AddCommand(cmd.NewStatusCmd())
 	rootCmd.AddCommand(cmd.NewCompletionCmd())
+	rootCmd.AddCommand(cmd.NewTUICmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
