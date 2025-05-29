@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newAddCmd() *cobra.Command {
+func NewAddCmd() *cobra.Command {
 	var name, email, gpgKey string
 	var signCommits bool
 
@@ -18,7 +18,7 @@ The profile will be saved in ~/.gitprofiles.json`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profileName := args[0]
-			profiles, err := loadProfiles()
+			profiles, err := LoadProfiles()
 			if err != nil {
 				return fmt.Errorf("failed to load profiles: %w", err)
 			}
@@ -30,12 +30,18 @@ The profile will be saved in ~/.gitprofiles.json`,
 				SignCommits: signCommits,
 			}
 
-			if err := saveProfiles(profiles); err != nil {
+			if err := SaveProfiles(profiles); err != nil {
 				return fmt.Errorf("failed to save profiles: %w", err)
 			}
 
 			fmt.Printf("Profile '%s' added successfully\n", profileName)
 			return nil
+		},
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			if len(args) > 0 {
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 	}
 

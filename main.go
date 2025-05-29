@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/Scharxi/gitprofile/cmd"
 )
 
 func main() {
@@ -14,9 +15,11 @@ func main() {
 and activate them per project.`,
 	}
 
-	rootCmd.AddCommand(newAddCmd())
-	rootCmd.AddCommand(newListCmd())
-	rootCmd.AddCommand(newUseCmd())
+	rootCmd.AddCommand(cmd.NewAddCmd())
+	rootCmd.AddCommand(cmd.NewListCmd())
+	rootCmd.AddCommand(cmd.NewUseCmd())
+	rootCmd.AddCommand(cmd.NewStatusCmd())
+	rootCmd.AddCommand(cmd.NewCompletionCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)

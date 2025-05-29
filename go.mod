@@ -1,4 +1,4 @@
-module gitprofile
+module github.com/Scharxi/gitprofile
 
 go 1.24
 

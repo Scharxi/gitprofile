@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newUseCmd() *cobra.Command {
-	return &cobra.Command{
+func NewUseCmd() *cobra.Command {
+	cmd := &cobra.Command{
 		Use:   "use [profile-name]",
 		Short: "Use a git profile in the current repository",
 		Long: `Set the git configuration for the current repository using a saved profile.
@@ -23,7 +23,7 @@ This will set user.name, user.email, and optionally configure GPG signing.`,
 			}
 
 			profileName := args[0]
-			profiles, err := loadProfiles()
+			profiles, err := LoadProfiles()
 			if err != nil {
 				return fmt.Errorf("failed to load profiles: %w", err)
 			}
@@ -62,7 +62,10 @@ This will set user.name, user.email, and optionally configure GPG signing.`,
 			fmt.Printf("Successfully activated profile '%s' in current repository\n", profileName)
 			return nil
 		},
+		ValidArgsFunction: ValidProfileArgsForUse,
 	}
+
+	return cmd
 }
 
 func runGitCommand(args ...string) error {
@@ -78,4 +81,4 @@ func runGitCommand(args ...string) error {
 		return fmt.Errorf("%s: %s", err.Error(), strings.TrimSpace(string(output)))
 	}
 	return nil
-}
+} 
