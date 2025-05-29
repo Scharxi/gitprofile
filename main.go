@@ -22,6 +22,8 @@ It allows you to save and switch between different git profiles with different n
 		cmd.NewUseCmd(),
 		cmd.NewStatusCmd(),
 		cmd.NewDeleteCmd(),
+		cmd.NewCompletionCmd(),
+		cmd.NewTUICmd(),
 	)
 
 	if err := rootCmd.Execute(); err != nil {
