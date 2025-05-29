@@ -13,6 +13,7 @@ type Profile struct {
 	Email       string `json:"email"`
 	GPGKey      string `json:"gpg_key,omitempty"`
 	SignCommits bool   `json:"sign_commits"`
+	SSHKey      string `json:"ssh_key,omitempty"`
 }
 
 type ProfileMap map[string]Profile
@@ -68,32 +69,32 @@ func GetCurrentProfile() (*Profile, string, error) {
 	// Get current git user name and email
 	nameCmd := exec.Command("git", "config", "--local", "user.name")
 	emailCmd := exec.Command("git", "config", "--local", "user.email")
-	
+
 	name, err := nameCmd.Output()
 	if err != nil {
 		return nil, "", nil // No local git config found
 	}
-	
+
 	email, err := emailCmd.Output()
 	if err != nil {
 		return nil, "", nil
 	}
-	
+
 	// Load all profiles
 	profiles, err := LoadProfiles()
 	if err != nil {
 		return nil, "", err
 	}
-	
+
 	// Find matching profile
 	currentName := strings.TrimSpace(string(name))
 	currentEmail := strings.TrimSpace(string(email))
-	
+
 	for profileName, profile := range profiles {
 		if profile.Name == currentName && profile.Email == currentEmail {
 			return &profile, profileName, nil
 		}
 	}
-	
+
 	return nil, "", nil
-} 
+}
